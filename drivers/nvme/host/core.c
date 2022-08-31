@@ -62,6 +62,9 @@ static bool streams;
 module_param(streams, bool, 0644);
 MODULE_PARM_DESC(streams, "turn on support for Streams write directives");
 
+static bool effects_enforcement = true;
+module_param(effects_enforcement, bool, 0644);
+MODULE_PARM_DESC(effects_enforcement, "enforce command effects handling");
 /*
  * nvme_wq - hosts nvme related works that are not reset or delete
  * nvme_reset_wq - hosts nvme reset works
@@ -1437,12 +1440,14 @@ static int nvme_user_cmd(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	if (cmd.timeout_ms)
 		timeout = msecs_to_jiffies(cmd.timeout_ms);
 
-	effects = nvme_passthru_start(ctrl, ns, cmd.opcode);
+	if(effects_enforcement)
+		effects = nvme_passthru_start(ctrl, ns, cmd.opcode);
 	status = nvme_submit_user_cmd(ns ? ns->queue : ctrl->admin_q, &c,
 			nvme_to_user_ptr(cmd.addr), cmd.data_len,
 			nvme_to_user_ptr(cmd.metadata), cmd.metadata_len,
 			0, &result, timeout);
-	nvme_passthru_end(ctrl, effects);
+	if(effects_enforcement & effects) /* nothing to be done for zero cmd effects */
+		nvme_passthru_end(ctrl, effects);
 
 	if (status >= 0) {
 		if (put_user(result, &ucmd->result))
@@ -2464,28 +2469,35 @@ static void nvme_init_subnqn(struct nvme_subsystem *subsys, struct nvme_ctrl *ct
 		struct nvme_id_ctrl *id)
 {
 	size_t nqnlen;
-	int off;
+	int off,ranlen;
+	size_t random;
 
+	get_random_bytes(&random,sizeof(random));
 	if(!(ctrl->quirks & NVME_QUIRK_IGNORE_DEV_SUBNQN)) {
 		nqnlen = strnlen(id->subnqn, NVMF_NQN_SIZE);
+		dev_info(ctrl->device, "nqnlen %024lx ctrl vs %024lx",nqnlen,ctrl->vs);
 		if (nqnlen > 0 && nqnlen < NVMF_NQN_SIZE) {
-			strlcpy(subsys->subnqn, id->subnqn, NVMF_NQN_SIZE);
+			off = snprintf(subsys->subnqn, NVMF_NQN_SIZE, "%04x", random & 0xffff);
+			strlcpy(subsys->subnqn + off, id->subnqn, NVMF_NQN_SIZE);
+			dev_info(ctrl->device, "nqn %s",subsys->subnqn);
 			return;
 		}
 
 		if (ctrl->vs >= NVME_VS(1, 2, 1))
 			dev_warn(ctrl->device, "missing or invalid SUBNQN field.\n");
+	        dev_info(ctrl->device, "nqnlen %024lx ctrl vs %024lx",nqnlen,ctrl->vs);
 	}
 
 	/* Generate a "fake" NQN per Figure 254 in NVMe 1.3 + ECN 001 */
 	off = snprintf(subsys->subnqn, NVMF_NQN_SIZE,
-			"nqn.2014.08.org.nvmexpress:%04x%04x",
-			le16_to_cpu(id->vid), le16_to_cpu(id->ssvid));
+			"nqn.2014.08.org.nvmexpress:%04x%04x%04x",
+			random & 0xffff, le16_to_cpu(id->vid), le16_to_cpu(id->ssvid));
 	memcpy(subsys->subnqn + off, id->sn, sizeof(id->sn));
 	off += sizeof(id->sn);
 	memcpy(subsys->subnqn + off, id->mn, sizeof(id->mn));
 	off += sizeof(id->mn);
 	memset(subsys->subnqn + off, 0, sizeof(subsys->subnqn) - off);
+	dev_info(ctrl->device, "fake nqn %s", subsys->subnqn);
 }
 
 static void nvme_release_subsystem(struct device *dev)

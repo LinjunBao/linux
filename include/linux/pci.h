@@ -1566,8 +1566,10 @@ static inline bool pcie_aspm_enabled(struct pci_dev *pdev) { return false; }
 
 #ifdef CONFIG_PCIEAER
 bool pci_aer_available(void);
+bool pci_serr_available(void);
 #else
 static inline bool pci_aer_available(void) { return false; }
+static inline bool pci_serr_available(void) ( return false; }
 #endif
 
 bool pci_ats_disabled(void);

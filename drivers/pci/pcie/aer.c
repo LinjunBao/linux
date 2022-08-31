@@ -102,6 +102,8 @@ struct aer_stats {
 
 static int pcie_aer_disable;
 
+static int pcie_serr_disable;
+
 void pci_no_aer(void)
 {
 	pcie_aer_disable = 1;
@@ -111,6 +113,17 @@ bool pci_aer_available(void)
 {
 	return !pcie_aer_disable && pci_msi_enabled();
 }
+
+void pci_no_serr(void)
+{
+	pcie_serr_disable = 1;
+}
+
+bool pci_serr_available(void)
+{
+	return !pcie_serr_disable && pci_aer_available();
+}
+
 
 #ifdef CONFIG_PCIE_ECRC
 

@@ -579,12 +579,15 @@ read_status:
 		status &= ~PCI_EXP_SLTSTA_PFD;
 
 	events |= status;
+	if (ctrl->power_fault_detected)
+		events &= ~PCI_EXP_SLTSTA_PFD;
 	if (!events) {
 		if (parent)
 			pm_runtime_put(parent);
 		return IRQ_NONE;
 	}
-
+        /* ignore PWR FKT as there is PLX HW BUG,will keep this bit set*/
+	status &= ~PCI_EXP_SLTSTA_PFD;
 	if (status) {
 		pcie_capability_write_word(pdev, PCI_EXP_SLTSTA, events);
 

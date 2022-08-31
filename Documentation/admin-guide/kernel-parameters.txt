@@ -3402,6 +3402,9 @@
 		noaer		[PCIE] If the PCIEAER kernel config parameter is
 				enabled, this kernel boot option can be used to
 				disable the use of PCIE advanced error reporting.
+		noserr		[PCIE] If the PCIEAER kernel config parameter is
+		enabled, this kernel boot option can be used to
+				disable the use of PCIE SERR forward to RP.
 		nodomains	[PCI] Disable support for multiple PCI
 				root domains (aka PCI segments, in ACPI-speak).
 		nommconf	[X86] Disable use of MMCONFIG for PCI
