@@ -58,6 +58,10 @@ MODULE_PARM_DESC(sgl_threshold,
 		"Use SGLs when average request segment size is larger or equal to "
 		"this size. Use 0 to disable SGLs.");
 
+static bool host_enable_hmb = false;
+module_param(host_enable_hmb, bool, 0644);
+MODULE_PARM_DESC(host_enable_hmb, "enable host memory buffer for I/O SQes");
+
 static int io_queue_depth_set(const char *val, const struct kernel_param *kp);
 static const struct kernel_param_ops io_queue_depth_ops = {
 	.set = io_queue_depth_set,
@@ -2620,7 +2624,7 @@ static void nvme_reset_work(struct work_struct *work)
 				 "unable to allocate dma for dbbuf\n");
 	}
 
-	if (dev->ctrl.hmpre) {
+	if (dev->ctrl.hmpre && host_enable_hmb) {
 		result = nvme_setup_host_mem(dev);
 		if (result < 0)
 			goto out;
