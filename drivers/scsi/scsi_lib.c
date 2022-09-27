@@ -815,18 +815,23 @@ static void scsi_io_completion_action(struct scsi_cmnd *cmd, int result)
 				scsi_print_command(cmd);
 			}
 		}
-		if (!scsi_end_request(req, blk_stat, blk_rq_err_bytes(req)))
+		if (!scsi_end_request(req, blk_stat, blk_rq_err_bytes(req))) {
+			printk(KERN_INFO "return from scsi_io_completion ACTION_FAIL");
 			return;
+		}
 		/*FALLTHRU*/
 	case ACTION_REPREP:
+		printk(KERN_INFO "scsi_io_completion_reprep");
 		scsi_io_completion_reprep(cmd, q);
 		break;
 	case ACTION_RETRY:
 		/* Retry the same command immediately */
+		printk(KERN_INFO "scsi_io_completion_retry");
 		__scsi_queue_insert(cmd, SCSI_MLQUEUE_EH_RETRY, false);
 		break;
 	case ACTION_DELAYED_RETRY:
 		/* Retry the same command after a delay */
+		printk(KERN_INFO "scsi_io_completion_delayed_retry");
 		__scsi_queue_insert(cmd, SCSI_MLQUEUE_DEVICE_BUSY, false);
 		break;
 	}
@@ -981,8 +986,10 @@ void scsi_io_completion(struct scsi_cmnd *cmd, unsigned int good_bytes)
 	 * If there had been no error, but we have leftover bytes in the
 	 * requeues just queue the command up again.
 	 */
-	if (likely(result == 0))
+	if (likely(result == 0)) {
+		printk(KERN_INFO "likely and reprep");
 		scsi_io_completion_reprep(cmd, q);
+	}
 	else
 		scsi_io_completion_action(cmd, result);
 }

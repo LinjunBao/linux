@@ -375,18 +375,18 @@ enum {
 	ATA_EHI_TO_SLAVE_MASK	= ATA_EHI_NO_AUTOPSY | ATA_EHI_QUIET,
 
 	/* max tries if error condition is still set after ->error_handler */
-	ATA_EH_MAX_TRIES	= 5,
+	ATA_EH_MAX_TRIES	= 1,
 
 	/* sometimes resuming a link requires several retries */
-	ATA_LINK_RESUME_TRIES	= 5,
+	ATA_LINK_RESUME_TRIES	= 1,
 
 	/* how hard are we gonna try to probe/recover devices */
-	ATA_PROBE_MAX_TRIES	= 3,
-	ATA_EH_DEV_TRIES	= 3,
-	ATA_EH_PMP_TRIES	= 5,
-	ATA_EH_PMP_LINK_TRIES	= 3,
+	ATA_PROBE_MAX_TRIES	= 1,
+	ATA_EH_DEV_TRIES	= 1,
+	ATA_EH_PMP_TRIES	= 1,
+	ATA_EH_PMP_LINK_TRIES	= 1,
 
-	SATA_PMP_RW_TIMEOUT	= 3000,		/* PMP read/write timeout */
+	SATA_PMP_RW_TIMEOUT	= 1000,		/* PMP read/write timeout */
 
 	/* This should match the actual table size of
 	 * ata_eh_cmd_timeout_table in libata-eh.c.

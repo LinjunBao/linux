@@ -750,8 +750,8 @@ void ata_scsi_port_error_handler(struct Scsi_Host *host, struct ata_port *ap)
 		!(ap->flags & ATA_FLAG_SAS_HOST))
 		schedule_delayed_work(&ap->hotplug_task, 0);
 
-	if (ap->pflags & ATA_PFLAG_RECOVERED)
-		ata_port_info(ap, "EH complete\n");
+//	if (ap->pflags & ATA_PFLAG_RECOVERED)
+//		ata_port_info(ap, "EH complete\n");
 
 	ap->pflags &= ~(ATA_PFLAG_SCSI_HOTPLUG | ATA_PFLAG_RECOVERED);
 
@@ -2446,21 +2446,21 @@ static void ata_eh_link_report(struct ata_link *link)
 		snprintf(tries_buf, sizeof(tries_buf), " t%d",
 			 ap->eh_tries);
 
-	if (ehc->i.dev) {
-		ata_dev_err(ehc->i.dev, "exception Emask 0x%x "
-			    "SAct 0x%x SErr 0x%x action 0x%x%s%s\n",
-			    ehc->i.err_mask, link->sactive, ehc->i.serror,
-			    ehc->i.action, frozen, tries_buf);
-		if (desc)
-			ata_dev_err(ehc->i.dev, "%s\n", desc);
-	} else {
-		ata_link_err(link, "exception Emask 0x%x "
-			     "SAct 0x%x SErr 0x%x action 0x%x%s%s\n",
-			     ehc->i.err_mask, link->sactive, ehc->i.serror,
-			     ehc->i.action, frozen, tries_buf);
-		if (desc)
-			ata_link_err(link, "%s\n", desc);
-	}
+//	if (ehc->i.dev) {
+//		ata_dev_err(ehc->i.dev, "exception Emask 0x%x "
+//			    "SAct 0x%x SErr 0x%x action 0x%x%s%s\n",
+//			    ehc->i.err_mask, link->sactive, ehc->i.serror,
+//			    ehc->i.action, frozen, tries_buf);
+//		if (desc)
+//			ata_dev_err(ehc->i.dev, "%s\n", desc);
+//	} else {
+//		ata_link_err(link, "exception Emask 0x%x "
+//			     "SAct 0x%x SErr 0x%x action 0x%x%s%s\n",
+//			     ehc->i.err_mask, link->sactive, ehc->i.serror,
+//			     ehc->i.action, frozen, tries_buf);
+//		if (desc)
+//			ata_link_err(link, "%s\n", desc);
+//	}
 
 #ifdef CONFIG_ATA_VERBOSE_ERROR
 	if (ehc->i.serror)
@@ -2547,51 +2547,51 @@ static void ata_eh_link_report(struct ata_link *link)
 					      cdb, cdb_len);
 		} else {
 			const char *descr = ata_get_cmd_descript(cmd->command);
-			if (descr)
-				ata_dev_err(qc->dev, "failed command: %s\n",
-					    descr);
+		//	if (descr)
+		//		ata_dev_err(qc->dev, "failed command: %s\n",
+		//			    descr);
 		}
 
-		ata_dev_err(qc->dev,
-			"cmd %02x/%02x:%02x:%02x:%02x:%02x/%02x:%02x:%02x:%02x:%02x/%02x "
-			"tag %d%s\n         %s"
-			"res %02x/%02x:%02x:%02x:%02x:%02x/%02x:%02x:%02x:%02x:%02x/%02x "
-			"Emask 0x%x (%s)%s\n",
-			cmd->command, cmd->feature, cmd->nsect,
-			cmd->lbal, cmd->lbam, cmd->lbah,
-			cmd->hob_feature, cmd->hob_nsect,
-			cmd->hob_lbal, cmd->hob_lbam, cmd->hob_lbah,
-			cmd->device, qc->tag, data_buf, cdb_buf,
-			res->command, res->feature, res->nsect,
-			res->lbal, res->lbam, res->lbah,
-			res->hob_feature, res->hob_nsect,
-			res->hob_lbal, res->hob_lbam, res->hob_lbah,
-			res->device, qc->err_mask, ata_err_string(qc->err_mask),
-			qc->err_mask & AC_ERR_NCQ ? " <F>" : "");
+	//	ata_dev_err(qc->dev,
+	//		"cmd %02x/%02x:%02x:%02x:%02x:%02x/%02x:%02x:%02x:%02x:%02x/%02x "
+	//		"tag %d%s\n         %s"
+	//		"res %02x/%02x:%02x:%02x:%02x:%02x/%02x:%02x:%02x:%02x:%02x/%02x "
+	//		"Emask 0x%x (%s)%s\n",
+	//		cmd->command, cmd->feature, cmd->nsect,
+	//		cmd->lbal, cmd->lbam, cmd->lbah,
+	//		cmd->hob_feature, cmd->hob_nsect,
+	//		cmd->hob_lbal, cmd->hob_lbam, cmd->hob_lbah,
+	//		cmd->device, qc->tag, data_buf, cdb_buf,
+	//		res->command, res->feature, res->nsect,
+	//		res->lbal, res->lbam, res->lbah,
+	//		res->hob_feature, res->hob_nsect,
+	//		res->hob_lbal, res->hob_lbam, res->hob_lbah,
+	//		res->device, qc->err_mask, ata_err_string(qc->err_mask),
+	//		qc->err_mask & AC_ERR_NCQ ? " <F>" : "");
 
 #ifdef CONFIG_ATA_VERBOSE_ERROR
-		if (res->command & (ATA_BUSY | ATA_DRDY | ATA_DF | ATA_DRQ |
-				    ATA_SENSE | ATA_ERR)) {
-			if (res->command & ATA_BUSY)
-				ata_dev_err(qc->dev, "status: { Busy }\n");
-			else
-				ata_dev_err(qc->dev, "status: { %s%s%s%s%s}\n",
-				  res->command & ATA_DRDY ? "DRDY " : "",
-				  res->command & ATA_DF ? "DF " : "",
-				  res->command & ATA_DRQ ? "DRQ " : "",
-				  res->command & ATA_SENSE ? "SENSE " : "",
-				  res->command & ATA_ERR ? "ERR " : "");
-		}
-
-		if (cmd->command != ATA_CMD_PACKET &&
-		    (res->feature & (ATA_ICRC | ATA_UNC | ATA_AMNF |
-				     ATA_IDNF | ATA_ABORTED)))
-			ata_dev_err(qc->dev, "error: { %s%s%s%s%s}\n",
-			  res->feature & ATA_ICRC ? "ICRC " : "",
-			  res->feature & ATA_UNC ? "UNC " : "",
-			  res->feature & ATA_AMNF ? "AMNF " : "",
-			  res->feature & ATA_IDNF ? "IDNF " : "",
-			  res->feature & ATA_ABORTED ? "ABRT " : "");
+//		if (res->command & (ATA_BUSY | ATA_DRDY | ATA_DF | ATA_DRQ |
+//				    ATA_SENSE | ATA_ERR)) {
+//			if (res->command & ATA_BUSY)
+//				ata_dev_err(qc->dev, "status: { Busy }\n");
+//			else
+//				ata_dev_err(qc->dev, "status: { %s%s%s%s%s}\n",
+//				  res->command & ATA_DRDY ? "DRDY " : "",
+//				  res->command & ATA_DF ? "DF " : "",
+//				  res->command & ATA_DRQ ? "DRQ " : "",
+//				  res->command & ATA_SENSE ? "SENSE " : "",
+//				  res->command & ATA_ERR ? "ERR " : "");
+//		}
+//
+//		if (cmd->command != ATA_CMD_PACKET &&
+//		    (res->feature & (ATA_ICRC | ATA_UNC | ATA_AMNF |
+//				     ATA_IDNF | ATA_ABORTED)))
+//			ata_dev_err(qc->dev, "error: { %s%s%s%s%s}\n",
+//			  res->feature & ATA_ICRC ? "ICRC " : "",
+//			  res->feature & ATA_UNC ? "UNC " : "",
+//			  res->feature & ATA_AMNF ? "AMNF " : "",
+//			  res->feature & ATA_IDNF ? "IDNF " : "",
+//			  res->feature & ATA_ABORTED ? "ABRT " : "");
 #endif
 	}
 }
@@ -3565,6 +3565,8 @@ static int ata_eh_skip_recovery(struct ata_link *link)
 	struct ata_port *ap = link->ap;
 	struct ata_eh_context *ehc = &link->eh_context;
 	struct ata_device *dev;
+	struct ata_queued_cmd *qc = __ata_qc_from_tag(ap, 0);
+	struct ata_taskfile *res = &qc->result_tf;
 
 	/* skip disabled links */
 	if (link->flags & ATA_LFLAG_DISABLED)
@@ -3573,6 +3575,13 @@ static int ata_eh_skip_recovery(struct ata_link *link)
 	/* skip if explicitly requested */
 	if (ehc->i.flags & ATA_EHI_NO_RECOVERY)
 		return 1;
+
+	/* if bootloader, finish immediately */
+//	printk(KERN_INFO "res->command 0x%x, res->feature 0x%x", res->command, res->feature);
+//	if (((res->command & (ATA_DRDY | ATA_DSC | ATA_ERR)) == (ATA_DRDY | ATA_DSC | ATA_ERR) ) && ((res->feature & ATA_IDNF) > 0)) {
+//		printk(KERN_INFO "enter ata_eh_skip_recovery and return 1 for BTL");
+//		return 1;
+//	}
 
 	/* thaw frozen port and recover failed devices */
 	if ((ap->pflags & ATA_PFLAG_FROZEN) || ata_link_nr_enabled(link))
@@ -3778,6 +3787,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 
  retry:
 	rc = 0;
+//	printk(KERN_INFO "ata_eh_recover retry");
 
 	/* if UNLOADING, finish immediately */
 	if (ap->pflags & ATA_PFLAG_UNLOADING)
@@ -3802,6 +3812,7 @@ int ata_eh_recover(struct ata_port *ap, ata_prereset_fn_t prereset,
 		if (!(ehc->i.action & ATA_EH_RESET))
 			continue;
 
+		printk(KERN_INFO "ata_eh_recover reset");
 		rc = ata_eh_reset(link, ata_link_nr_vacant(link),
 				  prereset, softreset, hardreset, postreset);
 		if (rc) {
@@ -3978,6 +3989,7 @@ void ata_eh_finish(struct ata_port *ap)
 			 * generate sense data in this function,
 			 * considering both err_mask and tf.
 			 */
+		//	printk(KERN_INFO "ata_eh_finish qc->flags 0x%x ATA_QCFLAG_RETRY 0x%x", qc->flags, ATA_QCFLAG_RETRY);
 			if (qc->flags & ATA_QCFLAG_RETRY)
 				ata_eh_qc_retry(qc);
 			else
