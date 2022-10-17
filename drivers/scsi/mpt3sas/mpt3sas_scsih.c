@@ -3100,11 +3100,11 @@ scsih_host_reset(struct scsi_cmnd *scmd)
 	ioc_info(ioc, "attempting host reset! scmd(%p)\n", scmd);
 	scsi_print_command(scmd);
 
-	if (ioc->is_driver_loading || ioc->remove_host) {
-		ioc_info(ioc, "Blocking the host reset\n");
-		r = FAILED;
-		goto out;
-	}
+	// if (ioc->is_driver_loading || ioc->remove_host) {
+	ioc_info(ioc, "Force blocking the host reset\n");
+	r = SUCCESS;
+	goto out;
+	// }
 
 	retval = mpt3sas_base_hard_reset_handler(ioc, FORCE_BIG_HAMMER);
 	r = (retval < 0) ? FAILED : SUCCESS;
