@@ -3151,12 +3151,48 @@ unsigned int pci_rescan_bus_bridge_resize(struct pci_dev *bridge)
 {
 	unsigned int max;
 	struct pci_bus *bus = bridge->subordinate;
+	int pcie_pos;
+	u16 lnksta;
+	int skip_child_bus_scan = 0;
+	int MAX_LINK_SCAN_TIMES = 10;
+	int link_scan_trial = 0;
 
-	max = pci_scan_child_bus(bus);
+	/* --- PCIe Link Active/Training Check --- */
+	while (link_scan_trial < MAX_LINK_SCAN_TIMES) {
+	    if (bridge && pci_is_pcie(bridge) && pcie_downstream_port(bridge)) { // Not a root bus
+		    pcie_pos = pci_find_capability(bridge, PCI_CAP_ID_EXP);
+		    if (pcie_pos) {
+		        pci_read_config_word(bridge, pcie_pos + PCI_EXP_LNKSTA, &lnksta);
+		        // Bit 13: DLLLA (Link Active), Bit 11: LT (Link Training)
+		        if (!(lnksta & PCI_EXP_LNKSTA_DLLLA)) {
+					dev_info(&bridge->dev, "Skip rescan: Link not active\n");
+		            skip_child_bus_scan = 1;
+					break;
+		        }
+		        if (lnksta & PCI_EXP_LNKSTA_LT) {
+		            dev_info(&bridge->dev, "Skip rescan: Link in training\n");
+		            skip_child_bus_scan = 1;
+					break;
+		        }
+		     }
+			msleep(5);
+			link_scan_trial += 1;
+		 }
+	}
+
+
+	/* [Continue with existing enumeration code] */
+	if (skip_child_bus_scan) {
+		max = bus->busn_res.end;
+		dev_info(&bridge->dev, "the max bus under this bridge %d", max);
+	}
+	else
+		max = pci_scan_child_bus(bus);
 
 	pci_assign_unassigned_bridge_resources(bridge);
 
-	pci_bus_add_devices(bus);
+	if (!skip_child_bus_scan)
+		pci_bus_add_devices(bus);
 
 	return max;
 }
